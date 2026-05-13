@@ -24,6 +24,7 @@ export const state = {
     threeUpInternalTransitionsRemaining: 0,
     lockedSlots: [false, false, false],
     currentBgSlot: 'b',
+    audioEnabled: false,
 
     foregroundSwapInterval: null,
     backgroundSwapInterval: null,

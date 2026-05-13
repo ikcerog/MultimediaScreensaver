@@ -7,7 +7,7 @@ import {
     MIN_BACKGROUND_HOLD_TIME
 } from './state.js';
 import { dom } from './dom.js';
-import { createImageElement, findNextImages } from './utils.js';
+import { createMediaElement, findNextImages } from './utils.js';
 import { updateThreeUpStatusDisplay } from './status.js';
 import { toggleLock } from './lock.js';
 
@@ -86,6 +86,12 @@ export async function startForegroundMode() {
         dom.foregroundLayer.style.opacity = '1';
         dom.foregroundLayer.style.pointerEvents = 'all';
 
+        // Mute + pause any background video while 3-Up is on top
+        [dom.bgSlotA, dom.bgSlotB].forEach(slot => {
+            const v = slot.querySelector('video');
+            if (v) { v.muted = true; v.pause(); }
+        });
+
         state.threeUpInternalTransitionsRemaining = THREE_UP_TRANSITIONS_PER_SCENE;
     }
 
@@ -153,11 +159,19 @@ async function prepareForegroundScene() {
             const imageIndex = (i + j * THREE_UP_SLOTS) % portraitImages.length;
             const file = portraitImages[imageIndex];
 
-            const promise = createImageElement(file).then(img => {
-                img.style.opacity = j === 0 ? '1' : '0';
-                img.style.zIndex = j === 0 ? '1' : '0';
-                img.dataset.slotIndex = j;
-                slotContainer.appendChild(img);
+            const promise = createMediaElement(file).then(media => {
+                media.style.opacity = j === 0 ? '1' : '0';
+                media.style.zIndex = j === 0 ? '1' : '0';
+                media.dataset.slotIndex = j;
+                if (media.tagName === 'VIDEO') {
+                    media.muted = true; // 3-Up lanes never play audio
+                    if (j === 0) {
+                        media.play().catch(() => {});
+                    } else {
+                        media.pause();
+                    }
+                }
+                slotContainer.appendChild(media);
             });
             imageLoadPromises.push(promise);
         }
@@ -194,9 +208,14 @@ function updateForegroundSlots() {
         if (nextImage) {
             activeImage.style.opacity = '0';
             activeImage.style.zIndex = '0';
+            if (activeImage.tagName === 'VIDEO') activeImage.pause();
 
             nextImage.style.opacity = '1';
             nextImage.style.zIndex = '1';
+            if (nextImage.tagName === 'VIDEO') {
+                nextImage.currentTime = 0;
+                nextImage.play().catch(() => {});
+            }
         }
     }
 }
@@ -221,10 +240,22 @@ async function updateBackgroundScene() {
     const activeSlot = (state.currentBgSlot === 'a') ? dom.bgSlotA : dom.bgSlotB;
     const inactiveSlot = (state.currentBgSlot === 'a') ? dom.bgSlotB : dom.bgSlotA;
 
-    const newImage = await createImageElement(file);
+    const newMedia = await createMediaElement(file);
+
+    // Pause + mute the outgoing media (if it was a video)
+    const outgoingVideo = activeSlot.querySelector('video');
+    if (outgoingVideo) {
+        outgoingVideo.muted = true;
+        outgoingVideo.pause();
+    }
 
     inactiveSlot.innerHTML = '';
-    inactiveSlot.appendChild(newImage);
+    inactiveSlot.appendChild(newMedia);
+
+    if (newMedia.tagName === 'VIDEO') {
+        newMedia.muted = !state.audioEnabled;
+        newMedia.play().catch(() => {});
+    }
 
     activeSlot.style.zIndex = '1';
     inactiveSlot.style.zIndex = '2';
@@ -235,4 +266,18 @@ async function updateBackgroundScene() {
     state.currentBgSlot = (state.currentBgSlot === 'a') ? 'b' : 'a';
 
     return true;
+}
+
+export function setBackgroundAudio(enabled) {
+    state.audioEnabled = enabled;
+    [dom.bgSlotA, dom.bgSlotB].forEach(slot => {
+        const v = slot.querySelector('video');
+        if (!v) return;
+        // Only the visible slot may emit audio
+        if (slot.style.opacity === '1') {
+            v.muted = !enabled;
+        } else {
+            v.muted = true;
+        }
+    });
 }

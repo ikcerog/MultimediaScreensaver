@@ -1,10 +1,33 @@
 import { state } from './state.js';
 import { dom } from './dom.js';
 
-export function createImageElement(file) {
+export function createMediaElement(file) {
+    if (file.mediaType === 'video') {
+        const vid = document.createElement('video');
+        vid.src = file.base64;
+        vid.className = 'slide-image absolute inset-0';
+        vid.autoplay = true;
+        vid.loop = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.dataset.mediaType = 'video';
+
+        return new Promise((resolve) => {
+            const done = () => resolve(vid);
+            vid.oncanplay = done;
+            vid.onloadeddata = done;
+            vid.onerror = () => {
+                console.error("Video load failed.");
+                done();
+            };
+            if (vid.readyState >= 2) done();
+        });
+    }
+
     const img = document.createElement('img');
     img.src = file.base64;
     img.className = 'slide-image absolute inset-0';
+    img.dataset.mediaType = 'image';
 
     return new Promise((resolve) => {
         img.onload = () => resolve(img);
