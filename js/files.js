@@ -66,6 +66,29 @@ export function handleDragLeave() {
     document.body.classList.remove('drag-over');
 }
 
+export function shuffleImages() {
+    const arr = state.imageFiles;
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    state.currentIndex = 0;
+
+    if (state.currentScene === SCENES.FOREGROUND_CASCADE) {
+        // Force a fresh 3-Up scene prep with the new order
+        state.currentScene = SCENES.BACKGROUND_REVEAL;
+        dom.foregroundLayer.style.opacity = '0';
+        dom.foregroundLayer.style.pointerEvents = 'none';
+        dom.foregroundLayer.innerHTML = '';
+    }
+
+    if (state.imageFiles.length > 0 && !dom.panelToggle.checked) {
+        startSlideshow();
+    }
+
+    showMessage(`Reshuffled ${arr.length} image(s).`, 'bg-indigo-600');
+}
+
 export function clearImages() {
     state.imageFiles.splice(0, state.imageFiles.length);
     state.currentIndex = 0;

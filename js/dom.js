@@ -14,6 +14,7 @@ export function initDom() {
     dom.initialMessage = document.getElementById('initial-message');
     dom.paceControls = document.getElementById('pace-controls');
     dom.panelToggle = document.getElementById('panel-toggle');
+    dom.reshuffleButton = document.getElementById('reshuffle-button');
 
     dom.messageBox = document.getElementById('message-box');
     dom.messageClose = document.getElementById('message-close');
