@@ -2,7 +2,7 @@ import { state, SCENES } from './state.js';
 import { dom, initDom } from './dom.js';
 import { hideMessage, updateStatus } from './utils.js';
 import { stopSlideshow, startSlideshow } from './scenes.js';
-import { handleDrop, handleDragOver, handleDragLeave, clearImages } from './files.js';
+import { handleDrop, handleDragOver, handleDragLeave, clearImages, shuffleImages } from './files.js';
 import { updateZoomScale, setPace } from './controls.js';
 
 // Expose clearImages globally for the inline onclick handler in the HTML.
@@ -52,4 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     dom.messageClose.addEventListener('click', hideMessage);
+
+    dom.reshuffleButton.addEventListener('click', shuffleImages);
 });
