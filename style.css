@@ -1,0 +1,153 @@
+/* Define the 'Inter' font for a modern look */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+/* CRITICAL FIX: Ensure full height cascade for absolutely positioned elements */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+/* --- General Animations for Panning/Zooming --- */
+
+/* The single keyframe animation for subtle, continuous pan/zoom */
+@keyframes slow-pan-zoom {
+    /* Start scale is always 1.05 to ensure full coverage (no background margin visible) */
+    0% { transform: scale(1.05) translate(0, 0); }
+    50% { transform: scale(var(--zoom-scale-end)) translate(var(--pan-x), var(--pan-y)); }
+    100% { transform: scale(1.05) translate(0, 0); }
+}
+
+/* All images use the default slow-pan-zoom animation */
+.slide-image {
+    animation: slow-pan-zoom 20s ease-in-out infinite alternate;
+}
+
+#slideshow-container {
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    /* Default end scale is 1.10 (5% user zoom + 5% cover offset) */
+    --zoom-scale-end: 1.10;
+    --pan-x: -0.5%;
+    --pan-y: -0.5%;
+}
+
+/* --- Fixed Layers and Transitioning --- */
+.slideshow-layer {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    transition: opacity 1s ease-in-out;
+    display: grid;
+    background-color: #1f2937; /* Dark background default */
+}
+
+/* Layer A is the permanent background (1-Up) */
+#background-layer {
+    opacity: 1;
+    z-index: 1;
+    pointer-events: none;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Layer B is the fading foreground (3-Up) */
+#foreground-layer {
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Fixed slots for 1-Up Crossfade (A and B) */
+.fixed-bg-slot {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    opacity: 0; /* Default hidden */
+    transition: opacity 1s ease-in-out; /* The critical crossfade transition */
+}
+
+/* Container for the image, ensures content is clipped for panning (used in 3-Up) */
+.slide-image-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    cursor: default;
+    border-radius: 0.5rem; /* Added general rounding */
+}
+
+/* Transition for internal image swaps and movement (used in 3-Up) */
+.slide-image-container img {
+    transition: opacity 1s ease-in-out;
+    position: absolute;
+}
+
+/* Specific CSS for the image elements */
+.slide-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+/* --- 3-Up Specific Styles --- */
+.layout-3-up { grid-template-columns: repeat(3, 1fr); }
+
+/* Add gap/padding effect for visual separation in multi-up layouts */
+.layout-3-up > .slide-image-container {
+    padding: 0.75rem;
+}
+
+/* Specific styles for the 3-Up Scene lanes */
+.layout-3-up .slide-image-container {
+    cursor: pointer;
+    border: 4px solid transparent;
+    transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    position: relative;
+}
+
+/* Visual indicator for a locked lane */
+.layout-3-up .slide-image-container.locked-lane {
+    border-color: #f59e0b; /* Amber border for lock */
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+}
+
+/* Lock Icon */
+.lock-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+    color: #f59e0b;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+}
+
+/* Drag and Drop visual feedback */
+.drag-over {
+    border: 4px dashed #6366f1;
+    background-color: rgba(99, 102, 241, 0.1);
+}
+
+/* Control Panel styles */
+#panel-toggle:checked ~ #control-panel-container {
+    transform: translateX(0);
+    pointer-events: all;
+}
+
+/* Pace Button Styling */
+.pace-button {
+    transition: all 0.2s ease;
+}
+.pace-button.active {
+    background-color: #4f46e5; /* indigo-600 */
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.5);
+    transform: scale(1.05);
+}

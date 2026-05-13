@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Scene Slideshow</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-900 text-white font-[Inter] m-0 p-0">
+
+    <!-- Control Panel Toggle Checkbox (Invisible) -->
+    <input type="checkbox" id="panel-toggle" class="hidden">
+
+    <!-- Controls Label (Button to toggle the panel) -->
+    <label for="panel-toggle" id="control-button" class="fixed top-4 right-4 z-50 p-3 bg-indigo-600 hover:bg-indigo-700 rounded-full shadow-lg cursor-pointer transition-transform duration-300 active:scale-95">
+        <!-- Lucide Settings Icon (Inline SVG) -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings text-white"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.78 1.35a2 2 0 0 0 .73 2.73l.15.08a2 2 0 0 1 1 1.73v.44a2 2 0 0 0 2 2v.18a2 2 0 0 1 1 1.73l.43.25a2 2 0 0 1 2 0l.15-.08a2 2 0 0 0 2.73.73l.78 1.35a2 2 0 0 0 .73 2.73l.15.08a2 2 0 0 1 1 1.73v.44a2 2 0 0 0 2 2v.18a2 2 0 0 1 1 1.73l.43.25a2 2 0 0 1 2 0l.15-.08a2 2 0 0 0 2.73-.73l.78-1.35a2 2 0 0 0 .73-2.73l-.15-.08a2 2 0 0 1-1-1.73v-.44a2 2 0 0 0-2-2v-.18a2 2 0 0 1-1-1.73l-.43-.25a2 2 0 0 1-2 0l-.15.08a2 2 0 0 0-2.73-.73l-.78-1.35a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+    </label>
+
+    <!-- Control Panel -->
+    <div id="control-panel-container" class="fixed top-0 right-0 h-screen w-full md:w-80 bg-gray-800/95 backdrop-blur-sm z-40 p-6 transition-transform duration-500 translate-x-full shadow-2xl pointer-events-none">
+        <div id="control-panel" class="h-full flex flex-col pointer-events-auto">
+            <h2 class="text-2xl font-bold mb-6 text-indigo-400">Slideshow Controls</h2>
+
+            <!-- Pace Setting (New Button Group) -->
+            <div class="mb-4 p-4 bg-gray-700/50 rounded-lg">
+                <label class="block text-sm font-medium mb-2">Scene Pace</label>
+                <div id="pace-controls" class="flex justify-between space-x-2">
+                    <button data-pace="8000" class="pace-button flex-1 p-2 rounded-lg bg-gray-600 hover:bg-gray-500">Slow (8s)</button>
+                    <button data-pace="5000" class="pace-button flex-1 p-2 rounded-lg bg-gray-600 hover:bg-gray-500 active">Mid (5s)</button>
+                    <button data-pace="3000" class="pace-button flex-1 p-2 rounded-lg bg-gray-600 hover:bg-gray-500">Fast (3s)</button>
+                </div>
+            </div>
+
+            <!-- Zoom Setting (Slider retained) -->
+            <div class="mb-6 p-4 bg-gray-700/50 rounded-lg">
+                <label for="zoom-slider" class="block text-sm font-medium mb-2">Zoom Movement (0% - 30%)</label>
+                <input type="range" id="zoom-slider" min="0" max="30" value="5" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer range-lg">
+                <span id="zoom-value" class="block text-lg font-bold mt-2 text-indigo-300">5%</span>
+            </div>
+
+            <!-- Image Count/Status -->
+            <div class="mb-6 p-4 bg-gray-700/50 rounded-lg">
+                <p class="text-sm font-medium">Loaded Images:</p>
+                <p id="image-count" class="text-lg font-bold text-green-400">0</p>
+                <button onclick="clearImages()" class="mt-4 w-full bg-red-600 hover:bg-red-700 p-2 rounded-lg font-semibold transition duration-200">
+                    Clear All Images
+                </button>
+            </div>
+
+            <!-- Scene Status Display -->
+            <div class="mb-6 p-4 bg-gray-700/50 rounded-lg">
+                <p class="text-sm font-medium">Current Scene:</p>
+                <p id="scene-status" class="text-xl font-extrabold text-yellow-300">Awaiting Images...</p>
+                <p id="three-up-status" class="text-xs text-gray-400 mt-1"></p>
+            </div>
+
+            <!-- Drag & Drop Instructions -->
+            <div class="flex-grow p-4 border-2 border-dashed border-gray-600 rounded-lg flex flex-col justify-center items-center text-center text-gray-400">
+                <p class="text-base font-semibold mb-2">Drag & Drop Images Here</p>
+                <p class="text-sm">...or anywhere on the screen! Supported files: JPG, PNG, GIF. (Max 200)</p>
+            </div>
+
+             <!-- Close Button -->
+            <button onclick="document.getElementById('panel-toggle').checked = false;" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg font-semibold transition duration-200 shadow-xl">
+                Start Slideshow
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Slideshow Container (Covers entire viewport) -->
+    <div id="slideshow-container" class="w-screen h-screen m-0 p-0 absolute top-0 left-0">
+        <!-- Layer A: Permanent Background (1-Up, Z-index 1, Always visible) -->
+        <div id="background-layer" class="slideshow-layer">
+             <!-- Fixed containers for reliable A/B crossfade -->
+            <div id="bg-slot-a" class="fixed-bg-slot z-10">
+                 <!-- Image element is created by JS inside here -->
+            </div>
+            <div id="bg-slot-b" class="fixed-bg-slot z-0">
+                 <!-- Image element is created by JS inside here -->
+            </div>
+             <!-- Z-index 10 added to ensure this message is visible above the empty fixed background slots -->
+             <p id="initial-message" class="text-2xl m-8 text-gray-500 absolute inset-0 flex items-center justify-center pointer-events-none z-10">Drag and drop images to start the slideshow.</p>
+        </div>
+        <!-- Layer B: Foreground (3-Up, Z-index 2, Fades in and out) -->
+        <div id="foreground-layer" class="slideshow-layer layout-3-up"></div>
+    </div>
+
+    <!-- Feedback Message Box -->
+    <div id="message-box" class="fixed bottom-4 left-1/2 -translate-x-1/2 p-3 bg-red-600 text-white rounded-lg shadow-xl hidden opacity-0 transition-opacity duration-300 z-60 flex items-center">
+        <span id="message-content"></span>
+        <button id="message-close" class="ml-4 p-1 rounded-full hover:bg-red-700 focus:outline-none">
+            <!-- Lucide X Icon (Inline SVG) -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
