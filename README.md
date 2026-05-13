@@ -1,9 +1,14 @@
 # MultimediaScreensaver
 
-A drag-and-drop photo screensaver / slideshow that runs entirely in the browser.
-Drop images onto the page and it cycles between a full-page "1-Up" pan-and-zoom
-view (landscape-biased) and a "3-Up" triple-cascade view (portrait-biased).
-Click a lane in 3-Up to lock it; open the gear icon to tweak pace and zoom.
+A drag-and-drop photo + video screensaver / slideshow that runs entirely in
+the browser. Drop images (JPG/PNG/GIF) and/or clips (MP4/WEBM) onto the page
+and it cycles between a full-page "1-Up" pan-and-zoom view (landscape-biased)
+and a "3-Up" triple-cascade view (portrait-biased). Click a lane in 3-Up to
+lock it; open the gear icon to tweak pace, zoom, audio, and order.
+
+Videos autoplay, loop, and start muted. Only the 1-Up background may emit
+sound — toggle **Background Audio** in the panel to enable it. 3-Up lanes are
+always muted so multiple clips can play visually without an audio pile-up.
 
 ## Run it
 

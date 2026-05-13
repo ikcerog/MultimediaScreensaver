@@ -1,7 +1,7 @@
 import { state, SCENES } from './state.js';
 import { dom, initDom } from './dom.js';
 import { hideMessage, updateStatus } from './utils.js';
-import { stopSlideshow, startSlideshow } from './scenes.js';
+import { stopSlideshow, startSlideshow, setBackgroundAudio } from './scenes.js';
 import { handleDrop, handleDragOver, handleDragLeave, clearImages, shuffleImages } from './files.js';
 import { updateZoomScale, setPace } from './controls.js';
 
@@ -54,4 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.messageClose.addEventListener('click', hideMessage);
 
     dom.reshuffleButton.addEventListener('click', shuffleImages);
+
+    dom.audioToggle.checked = state.audioEnabled;
+    dom.audioToggle.addEventListener('change', () => {
+        setBackgroundAudio(dom.audioToggle.checked);
+    });
 });
